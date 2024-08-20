@@ -10,6 +10,8 @@ import {
     useForm 
 } from "react-hook-form";
 import { BsGithub, BsGoogle } from "react-icons/bs";
+import toast from "react-hot-toast";
+import { signIn } from "next-auth/react";
 
 type variant = "LOGIN" | "REGISTER";
 const AuthForm = () => {
@@ -23,6 +25,7 @@ const AuthForm = () => {
             setVariant("LOGIN");
         } 
     }, [variant])
+
 
     const {
         register,
@@ -38,15 +41,34 @@ const AuthForm = () => {
         }
     })
 
-    const onSubmit: SubmitHandler<FieldValues> = (data) => {
-        setIsLoading(true)
-        if(variant === "LOGIN"){
-            //next-auth login
-        }
+
+    const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+        setIsLoading(true);
+
         if(variant==="REGISTER"){
             axios.post("/api/register", data)
+            .catch(()=> toast.error('Something went wrong'))
+            .finally(()=> setIsLoading(false))
         }
+
+        if(variant === "LOGIN"){
+            signIn("credentials", {
+                email: data.email,
+                password: data.password,
+                redirect: false,
+            })
+            .then((callback) => {
+                if (callback?.error) {
+                  toast.error('Invalid credentials!');
+                }
+        
+                if (callback?.ok) {
+                  toast.success('Logged in successfully!');
+                }
+              })
+              .finally(() => setIsLoading(false))
     }
+}
     const socialAction = (action:String)=> {
         setIsLoading(true);
         //next auth ocial sign in
@@ -161,6 +183,7 @@ const AuthForm = () => {
         </div> 
     </div>
   )
+    
 }
 
 export default AuthForm

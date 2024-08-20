@@ -29,26 +29,30 @@ export const authOptions:NextAuthConfig= {
                 password: {label: 'password', type: 'password'}
             },
             async authorize(credentials){  
-                if(!credentials?.email || !credentials?.password){
-                    throw new Error('Invalid Credentials')
+                try {
+                    if(!credentials?.email || !credentials?.password){
+                        throw new Error('Invalid Credentials')
+                    }
+                    const email = credentials.email as string;
+                    const password = credentials.password as string;
+                    const user = await db.select().from(users).where(eq(users.email, email));
+    
+                    if(!user.length || !user[0].hashedPassword){
+                        throw new Error('Invalid Credentials')
+                    }
+    
+                    const isCorrectPassword = await bcrypt.compare(
+                        password,
+                        user[0].hashedPassword
+                    );
+                    
+                    if(!isCorrectPassword){
+                        throw new Error('Invalid Credentials')
+                    }
+                    return user[0];
+                } catch (error) {
+                    throw new Error('Internal error')
                 }
-                const email = credentials.email as string;
-                const password = credentials.password as string;
-                const user = await db.select().from(users).where(eq(users.email, email));
-
-                if(!user || !user[0].hashedPassword){
-                    throw new Error('Invalid Credentials')
-                }
-
-                const isCorrectPassword = await bcrypt.compare(
-                    password,
-                    user[0].hashedPassword
-                );
-                
-                if(!isCorrectPassword){
-                    throw new Error('Invalid Credentials')
-                }
-                return user[0];
             }
         })
     ],
