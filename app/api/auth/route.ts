@@ -8,6 +8,7 @@ import { db } from '@/db/db';
 import { getProviders } from 'next-auth/react';
 import {eq} from 'drizzle-orm';
 import { use } from 'react';
+import { users } from '@/db/schema';
 
 
 
@@ -33,8 +34,8 @@ export const authOptions = {
                 if(!credentials?.email || !credentials?.password){
                     throw new Error('Invalid Credentials')
                 } 
-                const users = await db.query.users.findMany({
-                    where: eq(users.id, 1)
+                const hello = await db.query.users.findMany({
+                    where: eq(users.email, credentials.email)
                   }) 
                if(!users || !users?.hashedPassword) {
                      throw new Error('Invalid Credentials')
@@ -42,7 +43,7 @@ export const authOptions = {
 
                 const isCorrectPassword = await bcrypt.compare(
                     credentials.password,
-                    user.hashedPassword
+                    hello.hashedPassword
                 )
 
                 if(!isCorrectPassword){
