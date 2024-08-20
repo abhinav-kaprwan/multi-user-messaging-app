@@ -1,4 +1,5 @@
 'use client';
+import axios from "axios";
 import { useCallback, useState } from "react";
 import Input from "@/app/components/Input";
 import Button from "@/app/components/Button";
@@ -43,7 +44,7 @@ const AuthForm = () => {
             //next-auth login
         }
         if(variant==="REGISTER"){
-            //axios register
+            axios.post("/api/register", data)
         }
     }
     const socialAction = (action:String)=> {
