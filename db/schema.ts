@@ -12,25 +12,25 @@ import {
 
  import { relations } from "drizzle-orm";
 
-    export const users = pgTable('users', {
+    export const users = pgTable('user', {
         id: uuid('id').primaryKey().defaultRandom(),
         name: varchar('name', { length: 255 }),
         email: varchar('email', { length: 255 }).unique(),
-        emailVerified: timestamp('email_verified', { mode: 'date' }),
+        emailVerified: timestamp('emailVerified', { mode: 'date' }),
         image: text('image'),
-        hashedPassword: text('hashed_password'),
-        createdAt: timestamp('created_at').defaultNow(),
-        updatedAt: timestamp('updated_at'),
+        hashedPassword: text('hashedPassword'),
+        createdAt: timestamp('createdAt').defaultNow(),
+        updatedAt: timestamp('updatedAt'),
         status: varchar('status', { length: 50 }),
-        isTyping: boolean('is_typing').default(false),
+        isTyping: boolean('isTyping').default(false),
     });
 
-    export const accounts = pgTable('accounts', {
+    export const accounts = pgTable('account', {
         id: uuid('id').primaryKey().defaultRandom(),
-        userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+        userId: uuid('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
         type: varchar('type', { length: 255 }).notNull(),
         provider: varchar('provider', { length: 255 }).notNull(),
-        providerAccountId: varchar('provider_account_id', { length: 255 }).notNull(),
+        providerAccountId: varchar('providerAccountId', { length: 255 }).notNull(),
         refreshToken: text('refresh_token'),
         accessToken: text('access_token'),
         expiresAt: integer('expires_at'),
