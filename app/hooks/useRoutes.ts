@@ -26,9 +26,9 @@ import {
             active: pathname === '/users'
         },
         {
-            label: 'Logout',
-            href:'#',
+            label: 'Logout',  
             onClick:()=>signOut(),
+            href:'#',
             icon:HiArrowLeftOnRectangle,
         }
     ],[pathname, conversationId]);
