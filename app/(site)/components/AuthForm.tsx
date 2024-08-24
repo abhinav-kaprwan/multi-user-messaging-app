@@ -1,7 +1,7 @@
 'use client';
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
-import Input from "@/app/components/Input";
+import Input from "@/app/components/inputs/Input";
 import Button from "@/app/components/Button";
 import AuthSocialButton from "@/app/(site)/components/AuthSocialButton";
 import { 
