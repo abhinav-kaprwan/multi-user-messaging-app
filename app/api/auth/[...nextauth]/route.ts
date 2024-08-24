@@ -1,2 +1,2 @@
 
-export {GET,POST} from '@/authoptions'
+export {GET,POST} from '@/app/libs/utils/authoptions'
