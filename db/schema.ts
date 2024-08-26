@@ -60,7 +60,7 @@ import {
         }),
     }));
 
-    export const conversations = pgTable('conversations', {
+    export const conversations = pgTable('conversation', {
         id: uuid('id').primaryKey().defaultRandom(),
         createdAt: timestamp('created_at').defaultNow(),
         lastMessageAt: timestamp('last_message_at').defaultNow(),
@@ -68,13 +68,31 @@ import {
         isGroup: boolean('is_group'),
     });
 
-    export const userConversations = pgTable('user_conversations', {
+    export const conversationRelations = relations(conversations, ({ many }) => ({
+        user: many(userConversations), 
+    }));
+
+    export const userConversations = pgTable('user_conversation', {
         userId: uuid('user_id').notNull().references(() => users.id),
         conversationId: uuid('conversation_id').notNull().references(() => conversations.id),
     }, (table) => ({
         pk: primaryKey({columns:[table.userId, table.conversationId]}),
     }));
+
+    export const userConversationRelations = relations(userConversations, ({ one }) => ({
+        user: one(users, {
+            fields: [userConversations.userId],
+            references: [users.id],
+        }),
+        conversation: one(conversations, {
+            fields: [userConversations.conversationId],
+            references: [conversations.id],
+        }),
+    }));
+
     
+
+
 
     // export const messages = pgTable('messages', {
     //     id: uuid('id').primaryKey().defaultRandom(),
