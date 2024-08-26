@@ -43,12 +43,9 @@ export async function POST(request:Request){
             })
         }
 
-        const existingConversation = await db.select().from(conversations).where(
-            or(
-                eq(conversations.)
-            )
-        )
-            
+        const existingConversation = await db.select().from(conversations)
+            .innerJoin(userConversations,eq(conversations.id,userConversations.conversationId))
+            .where(or())       
         
     } catch (error:any) {
         return new NextResponse('Internal Error', {status:500});
