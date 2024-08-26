@@ -2,7 +2,7 @@ import getCurrentUser from "@/app/actions/getCurrentUser";
 import { NextResponse } from "next/server";
 import {db} from "@/db/db";
 import {conversations,userConversations} from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq,or } from "drizzle-orm";
 
 export async function POST(request:Request){
     try {
@@ -38,9 +38,17 @@ export async function POST(request:Request){
                 const conversationWithUsers = await tsx.query.conversations.findFirst({
                     where:eq(conversations.id,newConversation[0].id),
                     with:{user:true}
-                })
+                });
+                return NextResponse.json(conversationWithUsers);
             })
         }
+
+        const existingConversation = await db.select().from(conversations).where(
+            or(
+                eq(conversations.)
+            )
+        )
+            
         
     } catch (error:any) {
         return new NextResponse('Internal Error', {status:500});
