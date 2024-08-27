@@ -2,7 +2,7 @@ import getCurrentUser from "@/app/actions/getCurrentUser";
 import { NextResponse } from "next/server";
 import {db} from "@/db/db";
 import {conversations,userConversations} from "@/db/schema";
-import { eq,or } from "drizzle-orm";
+import { eq,and,sql } from "drizzle-orm";
 
 export async function POST(request:Request){
     try {
@@ -45,7 +45,16 @@ export async function POST(request:Request){
 
         const existingConversation = await db.select().from(conversations)
             .innerJoin(userConversations,eq(conversations.id,userConversations.conversationId))
-            .where(or())       
+            .where(and(
+                eq(conversations.isGroup,false),
+                sql`$(conversation.id) IN(
+                SELECT ${userConversations.conversationId}
+                FROM ${userConversations}
+                where $(userConversations.userId) IN (${currentUser.id},${userId})
+                GROUP BY ${userConversations.conversationId}
+                HAVING COUNT(DISTINCT ${userConversations.userId}) = 2
+                )`
+            )).limit(1)       
         
     } catch (error:any) {
         return new NextResponse('Internal Error', {status:500});
