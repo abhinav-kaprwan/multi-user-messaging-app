@@ -14,15 +14,29 @@ const UserBox:React.FC<UserBoxProps> = ({
 }) => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
-    const handleClick = useCallback(()=> {
-        setIsLoading(true);
-        axios.post('/api/conversation', {
-            userId:data.id
-        })
-        .then((data) => {
-            router.push(`/conversation/${data.data.id}`)
-        })
-        .finally(()=> setIsLoading(false));
+    const handleClick = useCallback(async ()=> {
+        try {
+            setIsLoading(true);
+            const response = await axios.post('/api/conversations', {
+              userId: data.id
+            });
+            console.log('response:', response);
+        
+            if (response.status === 200 && response.data.user_conversation && response.data.user_conversation.userId) {
+                console.log("checkpoint")
+                await router.push(`/conversations/${response.data.user_conversation.userId}`);
+                console.log("checkpoint 2")
+            } else {
+              console.error('Unexpected response:', response);
+            }
+          }
+          catch (error) {
+            console.error('Error creating conversation:', error);
+            // Handle error (e.g., show an error message to the user)
+          }
+        finally {
+            setIsLoading(false);
+        }
     },[data, router])
   
     return (
