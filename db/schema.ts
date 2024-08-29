@@ -28,7 +28,7 @@ import {
     export const userRelations = relations(users, ({ many }) => ({
         accounts: many(accounts),
         conversations: many(userConversations),
-        // messages: many(messages),
+        messages: many(messages),
         // seenMessages: many(userSeenMessages),
         // sentMessages: many(messages, { relationName: 'sender' }),
     }));
@@ -70,6 +70,7 @@ import {
 
     export const conversationRelations = relations(conversations, ({ many }) => ({
         user: many(userConversations), 
+        message: many(messages),
     }));
 
     export const userConversations = pgTable('user_conversation', {
@@ -91,44 +92,45 @@ import {
     }));
 
     
-
-
-
-    // export const messages = pgTable('messages', {
-    //     id: uuid('id').primaryKey().defaultRandom(),
-    //     body: text('body'),
-    //     image: text('image'),
-    //     createdAt: timestamp('created_at').defaultNow(),
-    //     conversationId: uuid('conversation_id').notNull().references(() => conversations.id, { onDelete: 'cascade' }),
-    //     senderId: uuid('sender_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-    // });
+    export const messages = pgTable('messages', {
+        id: uuid('id').primaryKey().defaultRandom(),
+        body: text('body'),
+        image: text('image'),
+        createdAt: timestamp('created_at').defaultNow(),
+        conversationId: uuid('conversation_id').notNull().references(() => conversations.id, { onDelete: 'cascade' }),
+        senderId: uuid('sender_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    });
 
     
 
-    // export const userSeenMessages = pgTable('user_seen_messages', {
-    //     userId: uuid('user_id').notNull().references(() => users.id),
-    //     messageId: uuid('message_id').notNull().references(() => messages.id),
-    // }, (table) => ({
-    //     primaryKey: primaryKey({columns:[table.userId, table.messageId]}),
-    // }));
+    export const userSeenMessages = pgTable('user_seen_messages', {
+        userId: uuid('user_id').notNull().references(() => users.id),
+        messageId: uuid('message_id').notNull().references(() => messages.id),
+    }, (table) => ({
+        primaryKey: primaryKey({columns:[table.userId, table.messageId]}),
+    }));
 
     
+    export const userSeenMessageRelations = relations(userSeenMessages, ({ one }) => ({
+        user: one(users, {
+            fields: [userSeenMessages.userId],
+            references: [users.id],
+        }),
+        message: one(messages, {
+            fields: [userSeenMessages.messageId],
+            references: [messages.id],
+        }),
+    }));
+    
+    export const messageRelations = relations(messages, ({ one, many }) => ({
+        conversation: one(conversations, {
+            fields: [messages.conversationId],
+            references: [conversations.id],
+        }),
+        sender: one(users, {
+            fields: [messages.senderId],
+            references: [users.id],
+        }),
+    }));
 
     
-    
-    // export const conversationRelations = relations(conversations, ({ many }) => ({
-    //     messages: many(messages),
-    //     users: many(userConversations),
-    // }));
-
-    // export const messageRelations = relations(messages, ({ one, many }) => ({
-    //     conversation: one(conversations, {
-    //         fields: [messages.conversationId],
-    //         references: [conversations.id],
-    //     }),
-    //     sender: one(users, {
-    //         fields: [messages.senderId],
-    //         references: [users.id],
-    //     }),
-    //     seenBy: many(userSeenMessages),
-    // }));
