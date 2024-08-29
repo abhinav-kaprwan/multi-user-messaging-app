@@ -24,7 +24,7 @@ const UserBox:React.FC<UserBoxProps> = ({
         
             if (response.status === 200 && response.data.user_conversation && response.data.user_conversation.userId) {
                 console.log("checkpoint")
-                await router.push(`/conversations/${response.data.user_conversation.userId}`);
+                await router.push(`/conversations/${response.data.conversation.id}`);
                 console.log("checkpoint 2")
             } else {
               console.error('Unexpected response:', response);
