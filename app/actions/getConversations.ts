@@ -11,11 +11,27 @@ const getConversations = async ()  => {
     }
 
     try {
+      // subquery aliasing for sender
+      const senderSubquery = db
+      .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      })
+      .from(users)
+      .as('sender');
+
       const allConversations = await db
       .select({
-        // conversation:conversations,
-        // userConversation:userConversations,
-        messages:messages
+        conversation:conversations,
+        userConversation:userConversations,
+        messages:messages,
+        sender: {
+          id: senderSubquery.id,
+          name: senderSubquery.name,
+          email: senderSubquery.email
+        },
+        seenBy:userSeenMessages,
       })
       .from(conversations)
       .innerJoin(
@@ -26,11 +42,24 @@ const getConversations = async ()  => {
         users,
         eq(userConversations.userId,currentUser.id)
         )
+      .innerJoin(
+          senderSubquery,
+          eq(senderSubquery.id,messages.senderId)
+        )
       .leftJoin(
         messages,
         eq(conversations.id,messages.conversationId)
       )
-      
+      .leftJoin(
+        userSeenMessages,
+        eq(messages.id,userSeenMessages.messageId)
+      )
+      .where(
+        eq(userConversations.userId,currentUser.id)
+      )
+      .orderBy(desc(conversations.lastMessageAt))
+
+      return allConversations;
     } catch (error:any) {
         return [];
     }
