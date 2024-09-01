@@ -2,7 +2,7 @@ import { db } from "@/db/db";
 import getCurrentUser from "./getCurrentUser";
 import { conversations, userConversations,users,messages,userSeenMessages } from "@/db/schema";
 import { eq,desc} from "drizzle-orm";
-
+import { ProcessedConversation } from "@/app/types/types";
 
 const getConversations = async ()  => {
     const currentUser = await getCurrentUser();
@@ -11,6 +11,7 @@ const getConversations = async ()  => {
     }
 
     try {
+          
       // subquery aliasing for sender
       const senderSubquery = db
       .select({
@@ -59,7 +60,40 @@ const getConversations = async ()  => {
       )
       .orderBy(desc(conversations.lastMessageAt))
 
-      return allConversations;
+      const processConversations = (allConversations: any[]) => {
+        const processedConversations = allConversations.reduce<Record<string, ProcessedConversation>>((acc, row) => {
+          const conversationId = row.conversation.id;
+      
+          if (!acc[conversationId]) {
+            acc[conversationId] = {
+              conversation: row.conversation,
+              userConversation: row.userConversation,
+              messages: [],
+              seenBy: []
+            };
+          }
+      
+          if (row.messages) {
+            const existingMessage = acc[conversationId].messages.find(m => m.id === row.messages.id);
+            if (!existingMessage) {
+              acc[conversationId].messages.push({
+                ...row.messages,
+                sender: row.sender
+              });
+            }
+          }
+      
+          if (row.seenBy && !acc[conversationId].seenBy.some(sb => sb.userId === row.seenBy.userId && sb.messageId === row.seenBy.messageId)) {
+            acc[conversationId].seenBy.push(row.seenBy);
+          }
+      
+          return acc;
+        }, {});
+      
+        return Object.values(processedConversations);
+      };
+      const result: ProcessedConversation[] =  processConversations(allConversations);
+      return result;
     } catch (error:any) {
         return [];
     }
