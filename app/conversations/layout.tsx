@@ -6,6 +6,7 @@ export default async function ConversationsLayout({
 }: {
     children:React.ReactNode
 }) {
+    
     const conversations = await getConversations();
     return (
         <Sidebar>

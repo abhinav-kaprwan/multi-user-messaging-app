@@ -93,6 +93,7 @@ const getConversations = async ()  => {
         return Object.values(processedConversations);
       };
       const result: ProcessedConversation[] =  processConversations(allConversations);
+      console.log('Conversations:', result);
       return result;
     } catch (error:any) {
         return [];
